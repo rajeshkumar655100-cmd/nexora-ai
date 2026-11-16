@@ -1,0 +1,283 @@
+
+const app = document.querySelector(".app");
+const chatBox = document.getElementById("chat-box");
+const historyBox = document.getElementById("history");
+const userInput = document.getElementById("user-input");
+
+let chats = JSON.parse(
+  localStorage.getItem("nexora_chats") || "[]"
+);
+
+let currentChatId = null;
+
+// Save chats
+function saveChats() {
+  localStorage.setItem(
+    "nexora_chats",
+    JSON.stringify(chats)
+  );
+}
+
+// Current chat
+function getCurrentChat() {
+  return chats.find(c => c.id === currentChatId);
+}
+
+// New chat
+function createChat() {
+  const chat = {
+    id: Date.now().toString(),
+    title: "New Chat",
+    messages: []
+  };
+
+  chats.unshift(chat);
+  currentChatId = chat.id;
+
+  saveChats();
+  renderHistory();
+  renderChat();
+  userInput.focus();
+}
+
+// Display history
+function renderHistory() {
+  historyBox.innerHTML = "";
+
+  chats.forEach(chat => {
+    const item = document.createElement("div");
+    item.className = "history-item";
+
+    if (chat.id === currentChatId) {
+      item.classList.add("active");
+    }
+
+    const name = document.createElement("span");
+    name.className = "history-name";
+    name.textContent = "💬 " + chat.title;
+
+    const del = document.createElement("button");
+    del.className = "delete-chat";
+    del.textContent = "✕";
+
+    del.onclick = (e) => {
+      e.stopPropagation();
+      deleteChat(chat.id);
+    };
+
+    item.append(name, del);
+
+    item.onclick = () => {
+      currentChatId = chat.id;
+      renderHistory();
+      renderChat();
+
+      if (innerWidth <= 650) {
+        app.classList.add("sidebar-hidden");
+      }
+    };
+
+    historyBox.appendChild(item);
+  });
+}
+
+// Display messages
+function renderChat() {
+  chatBox.innerHTML = "";
+
+  const chat = getCurrentChat();
+
+  if (!chat || chat.messages.length === 0) {
+    chatBox.innerHTML = `
+      <div class="welcome">
+        <div class="logo">✦</div>
+        <h1>Welcome to Nexora AI</h1>
+        <p>Your intelligent AI assistant.</p>
+        <div class="suggestions">
+          <button class="suggestion">Explain Science</button>
+          <button class="suggestion">Help me learn Coding</button>
+          <button class="suggestion">Write a Story</button>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  chat.messages.forEach(msg => {
+    const div = document.createElement("div");
+    div.className = "message " +
+      (msg.role === "user" ? "user-message" : "bot-message");
+
+    const label = document.createElement("span");
+    label.className = "message-label";
+    label.textContent =
+      msg.role === "user" ? "You" : "Nexora AI";
+
+    const content = document.createElement("div");
+    content.textContent = msg.text;
+
+    div.append(label, content);
+    chatBox.appendChild(div);
+  });
+
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+// Demo response system
+function getDemoReply(message) {
+  const text = message.toLowerCase();
+
+  if (text.includes("hello") || text.includes("hi")) {
+    return "Hello! Welcome to Nexora AI. How can I help you?";
+  }
+
+  if (text.includes("coding") || text.includes("html")) {
+    return "HTML is used to create website structure. CSS designs the website, and JavaScript makes it interactive.";
+  }
+
+  if (text.includes("science")) {
+    return "Science helps us understand the world around us. It includes Physics, Chemistry and Biology.";
+  }
+
+  if (text.includes("math")) {
+    return "Mathematics is the study of numbers, shapes and calculations. What math topic would you like to learn?";
+  }
+
+  if (text.includes("who are you")) {
+    return "I am Nexora AI, a demo chatbot created for the Nexora project.";
+  }
+
+  if (text.includes("thank")) {
+    return "You're welcome! Thanks for using Nexora AI.";
+  }
+
+  return "I received your message! This is Nexora AI's demo mode. Real AI connection will be added in a later mission.";
+}
+
+// Send message
+function sendMessage() {
+  const text = userInput.value.trim();
+
+  if (!text) return;
+
+  if (!currentChatId) {
+    createChat();
+  }
+
+  const chat = getCurrentChat();
+
+  chat.messages.push({
+    role: "user",
+    text: text
+  });
+
+  if (chat.title === "New Chat") {
+    chat.title = text.slice(0, 25);
+  }
+
+  userInput.value = "";
+
+  saveChats();
+  renderHistory();
+  renderChat();
+
+  const reply = getDemoReply(text);
+
+  setTimeout(() => {
+    const activeChat = getCurrentChat();
+
+    if (!activeChat) return;
+
+    activeChat.messages.push({
+      role: "assistant",
+      text: reply
+    });
+
+    saveChats();
+    renderChat();
+  }, 500);
+}
+
+// Delete chat
+function deleteChat(id) {
+  chats = chats.filter(c => c.id !== id);
+
+  if (currentChatId === id) {
+    currentChatId = null;
+  }
+
+  saveChats();
+
+  if (!chats.length) {
+    createChat();
+    return;
+  }
+
+  if (!currentChatId) {
+    currentChatId = chats[0].id;
+  }
+
+  renderHistory();
+  renderChat();
+}
+
+// New chat buttons
+document.getElementById("new-chat")
+  .addEventListener("click", createChat);
+
+document.getElementById("top-new-chat")
+  .addEventListener("click", createChat);
+
+// Sidebar
+document.getElementById("menu-btn")
+  .addEventListener("click", () => {
+    app.classList.toggle("sidebar-hidden");
+  });
+
+document.getElementById("close-sidebar")
+  .addEventListener("click", () => {
+    app.classList.add("sidebar-hidden");
+  });
+
+// Send button
+document.getElementById("send-btn")
+  .addEventListener("click", sendMessage);
+
+userInput.addEventListener("keydown", e => {
+  if (e.key === "Enter") {
+    sendMessage();
+  }
+});
+
+// Theme
+document.getElementById("theme-btn")
+  .addEventListener("click", () => {
+    document.body.classList.toggle("light");
+
+    const light =
+      document.body.classList.contains("light");
+
+    document.getElementById("theme-btn").textContent =
+      light ? "🌙 Dark Theme" : "☀️ Light Theme";
+  });
+
+// Suggestions
+chatBox.addEventListener("click", e => {
+  if (e.target.classList.contains("suggestion")) {
+    userInput.value = e.target.textContent;
+    sendMessage();
+  }
+});
+
+// Start app
+if (innerWidth <= 650) {
+  app.classList.add("sidebar-hidden");
+}
+
+if (chats.length > 0) {
+  currentChatId = chats[0].id;
+  renderHistory();
+  renderChat();
+} else {
+  createChat();
+}

@@ -1,0 +1,74 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nexora AI</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="app">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <h2>✦ Nexora AI</h2>
+      <button id="close-sidebar">×</button>
+    </div>
+
+    <button class="new-chat" id="new-chat">
+      ＋ New Chat
+    </button>
+
+    <h3 class="history-title">Your Chats</h3>
+    <div id="history" class="history"></div>
+
+    <div class="sidebar-bottom">
+      <button id="theme-btn">🌙 Change Theme</button>
+      <p>Nexora AI v1.0</p>
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <header class="topbar">
+      <button id="menu-btn">☰</button>
+      <h2>Nexora AI</h2>
+      <button id="top-new-chat">＋</button>
+    </header>
+
+    <section id="chat-box" class="chat-box">
+      <div class="welcome" id="welcome">
+        <div class="logo">✦</div>
+        <h1>Welcome to Nexora AI</h1>
+        <p>Your intelligent AI assistant.</p>
+        <div class="suggestions">
+          <button class="suggestion">Explain Science</button>
+          <button class="suggestion">Help me learn Coding</button>
+          <button class="suggestion">Write a Story</button>
+        </div>
+      </div>
+    </section>
+
+    <div class="input-area">
+      <div class="input-box">
+        <input
+          type="text"
+          id="user-input"
+          placeholder="Message Nexora AI..."
+          autocomplete="off"
+        >
+        <button id="send-btn">➤</button>
+      </div>
+      <p class="disclaimer">
+        Nexora AI can make mistakes. Check important information.
+      </p>
+    </div>
+
+  </main>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
