@@ -5,19 +5,17 @@ const app = express();
 
 app.use(express.json());
 
+app.get("/", (req, res) => {
+  res.send("Nexora AI Backend is Running!");
+});
+
 app.post("/api/chat", async (req, res) => {
   try {
     const message = req.body.message;
 
-    if (!message || typeof message !== "string") {
+    if (!message) {
       return res.status(400).json({
-        error: "Please enter a message."
-      });
-    }
-
-    if (message.length > 4000) {
-      return res.status(400).json({
-        error: "Message is too long."
+        error: "Message is required"
       });
     }
 
@@ -30,7 +28,7 @@ app.post("/api/chat", async (req, res) => {
           "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`
         },
         body: JSON.stringify({
-          model: "gpt-6-luna",
+          model: "gpt-4.1-mini",
           input: message
         })
       }
@@ -39,9 +37,9 @@ app.post("/api/chat", async (req, res) => {
     const data = await response.json();
 
     if (!response.ok) {
-      console.error("AI API error:", data);
+      console.error(data);
       return res.status(502).json({
-        error: "AI service is temporarily unavailable."
+        error: "AI service error"
       });
     }
 
@@ -51,9 +49,8 @@ app.post("/api/chat", async (req, res) => {
 
   } catch (error) {
     console.error(error);
-
     res.status(500).json({
-      error: "Server error. Please try again."
+      error: "Server error"
     });
   }
 });
@@ -61,5 +58,6 @@ app.post("/api/chat", async (req, res) => {
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-  console.log(`Nexora AI server running on ${PORT}`);
+  console.log("Nexora AI Server Running on " + PORT);
 });
+
